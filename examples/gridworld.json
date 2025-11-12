@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "gamma": 0.9,
+  "epsilon": 0.001,
+  "startStateId": "s0",
+  "states": [
+    {
+      "id": "s0",
+      "label": "S0",
+      "x": 150,
+      "y": 150,
+      "terminal": false,
+      "reward": 0
+    },
+    {
+      "id": "s1",
+      "label": "S1",
+      "x": 300,
+      "y": 150,
+      "terminal": false,
+      "reward": 0
+    },
+    {
+      "id": "s2",
+      "label": "S2",
+      "x": 150,
+      "y": 300,
+      "terminal": false,
+      "reward": 0
+    },
+    {
+      "id": "goal",
+      "label": "Goal",
+      "x": 300,
+      "y": 300,
+      "terminal": true,
+      "reward": 10
+    }
+  ],
+  "actions": [
+    {
+      "id": "a1",
+      "stateId": "s0",
+      "label": "right",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "s1", "prob": 0.8 },
+        { "toStateId": "s0", "prob": 0.2 }
+      ]
+    },
+    {
+      "id": "a2",
+      "stateId": "s0",
+      "label": "down",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "s2", "prob": 0.8 },
+        { "toStateId": "s0", "prob": 0.2 }
+      ]
+    },
+    {
+      "id": "a3",
+      "stateId": "s1",
+      "label": "down",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "goal", "prob": 0.8 },
+        { "toStateId": "s1", "prob": 0.2 }
+      ]
+    },
+    {
+      "id": "a4",
+      "stateId": "s1",
+      "label": "left",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "s0", "prob": 0.8 },
+        { "toStateId": "s1", "prob": 0.2 }
+      ]
+    },
+    {
+      "id": "a5",
+      "stateId": "s2",
+      "label": "right",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "goal", "prob": 0.8 },
+        { "toStateId": "s2", "prob": 0.2 }
+      ]
+    },
+    {
+      "id": "a6",
+      "stateId": "s2",
+      "label": "up",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "s0", "prob": 0.8 },
+        { "toStateId": "s2", "prob": 0.2 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "gamma": 0.99,
+  "epsilon": 0.001,
+  "startStateId": "healthy",
+  "states": [
+    {
+      "id": "healthy",
+      "label": "Healthy",
+      "x": 200,
+      "y": 200,
+      "terminal": false,
+      "reward": 0
+    },
+    {
+      "id": "sick",
+      "label": "Sick",
+      "x": 400,
+      "y": 200,
+      "terminal": false,
+      "reward": -10
+    },
+    {
+      "id": "dead",
+      "label": "Dead",
+      "x": 600,
+      "y": 200,
+      "terminal": true,
+      "reward": -100
+    },
+    {
+      "id": "recovered",
+      "label": "Recovered",
+      "x": 400,
+      "y": 350,
+      "terminal": true,
+      "reward": 50
+    }
+  ],
+  "actions": [
+    {
+      "id": "wait_healthy",
+      "stateId": "healthy",
+      "label": "wait",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "healthy", "prob": 0.9 },
+        { "toStateId": "sick", "prob": 0.1 }
+      ]
+    },
+    {
+      "id": "exercise",
+      "stateId": "healthy",
+      "label": "exercise",
+      "cost": 2,
+      "outcomes": [
+        { "toStateId": "healthy", "prob": 0.95 },
+        { "toStateId": "sick", "prob": 0.05 }
+      ]
+    },
+    {
+      "id": "rest",
+      "stateId": "sick",
+      "label": "rest",
+      "cost": 1,
+      "outcomes": [
+        { "toStateId": "sick", "prob": 0.5 },
+        { "toStateId": "recovered", "prob": 0.4 },
+        { "toStateId": "dead", "prob": 0.1 }
+      ]
+    },
+    {
+      "id": "medicine",
+      "stateId": "sick",
+      "label": "medicine",
+      "cost": 5,
+      "outcomes": [
+        { "toStateId": "sick", "prob": 0.2 },
+        { "toStateId": "recovered", "prob": 0.75 },
+        { "toStateId": "dead", "prob": 0.05 }
+      ]
+    },
+    {
+      "id": "ignore",
+      "stateId": "sick",
+      "label": "ignore",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "sick", "prob": 0.6 },
+        { "toStateId": "recovered", "prob": 0.1 },
+        { "toStateId": "dead", "prob": 0.3 }
+      ]
+    }
+  ]
+}

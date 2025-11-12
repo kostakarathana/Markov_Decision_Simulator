@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "gamma": 0.95,
+  "epsilon": 0.001,
+  "startStateId": "start",
+  "states": [
+    {
+      "id": "start",
+      "label": "Start",
+      "x": 200,
+      "y": 250,
+      "terminal": false,
+      "reward": 0
+    },
+    {
+      "id": "work",
+      "label": "Work",
+      "x": 550,
+      "y": 150,
+      "terminal": true,
+      "reward": 45
+    },
+    {
+      "id": "delay",
+      "label": "Delay",
+      "x": 400,
+      "y": 350,
+      "terminal": false,
+      "reward": 0
+    },
+    {
+      "id": "home",
+      "label": "Home",
+      "x": 550,
+      "y": 350,
+      "terminal": true,
+      "reward": 0
+    }
+  ],
+  "actions": [
+    {
+      "id": "bike",
+      "stateId": "start",
+      "label": "bike",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "work", "prob": 1.0 }
+      ]
+    },
+    {
+      "id": "car",
+      "stateId": "start",
+      "label": "car",
+      "cost": 0,
+      "outcomes": [
+        { "toStateId": "work", "prob": 1.0 }
+      ]
+    },
+    {
+      "id": "train1",
+      "stateId": "start",
+      "label": "train",
+      "cost": 5,
+      "outcomes": [
+        { "toStateId": "delay", "prob": 0.2 },
+        { "toStateId": "home", "prob": 0.8 }
+      ]
+    },
+    {
+      "id": "train2",
+      "stateId": "delay",
+      "label": "train",
+      "cost": 2,
+      "outcomes": [
+        { "toStateId": "home", "prob": 1.0 }
+      ]
+    }
+  ]
+}

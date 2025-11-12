@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MDP Simulator</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel: Tools & Settings -->
+        <aside class="left-panel">
+            <h2>MDP Simulator</h2>
+            
+            <section class="tools">
+                <h3>Tools</h3>
+                <button id="btn-add-state" class="tool-btn">Add State</button>
+                <button id="btn-add-action" class="tool-btn">Add Action</button>
+                <button id="btn-delete" class="tool-btn">Delete</button>
+                <hr>
+                <button id="btn-solve" class="tool-btn primary">Solve</button>
+                <button id="btn-simulate" class="tool-btn">Simulate</button>
+                <hr>
+                <button id="btn-export" class="tool-btn">Export JSON</button>
+                <button id="btn-import" class="tool-btn">Import JSON</button>
+                <button id="btn-reset" class="tool-btn danger">Reset</button>
+            </section>
+
+            <section class="settings">
+                <h3>Settings</h3>
+                <div class="form-group">
+                    <label for="gamma">Discount (γ):</label>
+                    <input type="number" id="gamma" min="0" max="1" step="0.01" value="0.95">
+                </div>
+                <div class="form-group">
+                    <label for="epsilon">Epsilon (ε):</label>
+                    <input type="number" id="epsilon" min="0.0001" max="1" step="0.0001" value="0.001">
+                </div>
+                <div class="form-group">
+                    <label for="start-state">Start State:</label>
+                    <select id="start-state">
+                        <option value="">-- Select --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sim-steps">Sim Steps:</label>
+                    <input type="number" id="sim-steps" min="1" max="100" value="20">
+                </div>
+            </section>
+
+            <section class="status">
+                <h3>Status</h3>
+                <div id="status-message" class="status-message">Ready</div>
+            </section>
+        </aside>
+
+        <!-- Center Panel: SVG Canvas -->
+        <main class="canvas-panel">
+            <svg id="canvas" width="100%" height="100%">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" 
+                            refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#666" />
+                    </marker>
+                    <marker id="arrowhead-optimal" markerWidth="10" markerHeight="10" 
+                            refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#4CAF50" />
+                    </marker>
+                </defs>
+                <g id="edges-layer"></g>
+                <g id="states-layer"></g>
+                <g id="simulation-layer"></g>
+            </svg>
+        </main>
+
+        <!-- Right Panel: Inspector -->
+        <aside class="right-panel">
+            <h2>Inspector</h2>
+            
+            <div id="no-selection" class="inspector-section">
+                <p>Select a state or action to edit</p>
+            </div>
+
+            <div id="state-inspector" class="inspector-section" style="display: none;">
+                <h3>State Properties</h3>
+                <div class="form-group">
+                    <label for="state-label">Label:</label>
+                    <input type="text" id="state-label" placeholder="State name">
+                </div>
+                <div class="form-group">
+                    <label for="state-reward">Reward:</label>
+                    <input type="number" id="state-reward" step="0.1" value="0">
+                </div>
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="state-terminal">
+                    <label for="state-terminal">Terminal State</label>
+                </div>
+                
+                <h4>Actions from this state:</h4>
+                <div id="state-actions-list"></div>
+
+                <div id="state-solution" style="display: none;">
+                    <h4>Solution:</h4>
+                    <div class="solution-info">
+                        <div>Value: <span id="state-value">--</span></div>
+                        <div>Policy: <span id="state-policy">--</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="action-inspector" class="inspector-section" style="display: none;">
+                <h3>Action Properties</h3>
+                <div class="form-group">
+                    <label for="action-label">Label:</label>
+                    <input type="text" id="action-label" placeholder="Action name">
+                </div>
+                <div class="form-group">
+                    <label for="action-cost">Cost:</label>
+                    <input type="number" id="action-cost" step="0.1" value="0">
+                </div>
+
+                <h4>Outcomes:</h4>
+                <div id="outcomes-list"></div>
+                <button id="btn-add-outcome" class="small-btn">+ Add Outcome</button>
+                <div id="prob-warning" class="warning" style="display: none;">
+                    ⚠️ Probabilities must sum to 1.0
+                </div>
+            </div>
+
+            <div id="solution-inspector" class="inspector-section" style="display: none;">
+                <h3>Solution Results</h3>
+                <div class="solution-info">
+                    <div>Iterations: <span id="sol-iterations">--</span></div>
+                    <div>Converged: <span id="sol-converged">--</span></div>
+                </div>
+                <h4>Value Table:</h4>
+                <div id="value-table"></div>
+            </div>
+
+            <div id="simulation-inspector" class="inspector-section" style="display: none;">
+                <h3>Simulation Results</h3>
+                <div class="simulation-info">
+                    <div>Total Reward: <span id="sim-total-reward">--</span></div>
+                    <div>Steps Taken: <span id="sim-steps-taken">--</span></div>
+                </div>
+                <h4>Trajectory:</h4>
+                <div id="sim-trajectory"></div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+
+    <!-- All JavaScript bundled inline - no modules needed! -->
+    <script src="js/standalone.js"></script>
+</body>
+</html>
