@@ -48,6 +48,39 @@ body {
 }
 
 /* Tools */
+.examples {
+    margin-bottom: 20px;
+}
+
+.example-btn {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1px solid #ddd;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.example-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.example-btn:active {
+    transform: scale(0.98);
+}
+
+.example-btn.new {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    font-weight: 600;
+}
+
 .tools {
     margin-bottom: 20px;
 }

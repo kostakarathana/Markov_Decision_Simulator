@@ -12,14 +12,6 @@
         <aside class="left-panel">
             <h2>MDP Simulator</h2>
             
-            <section class="examples">
-                <h3>Examples</h3>
-                <button id="btn-example-recycling" class="example-btn">♻️ Recycling Robot</button>
-                <button id="btn-example-gridworld" class="example-btn">🔲 Grid World</button>
-                <button id="btn-example-health" class="example-btn">🏥 Health Mgmt</button>
-                <button id="btn-new-graph" class="example-btn new">✨ New Graph</button>
-            </section>
-            
             <section class="tools">
                 <h3>Tools</h3>
                 <button id="btn-add-state" class="tool-btn">Add State</button>
@@ -31,6 +23,7 @@
                 <hr>
                 <button id="btn-export" class="tool-btn">Export JSON</button>
                 <button id="btn-import" class="tool-btn">Import JSON</button>
+                <button id="btn-reset" class="tool-btn danger">Reset</button>
             </section>
 
             <section class="settings">
@@ -159,7 +152,7 @@
     <!-- Hidden file input for import -->
     <input type="file" id="import-file-input" accept=".json" style="display: none;">
 
-    <!-- All JavaScript bundled - NO MODULES, works from file:// -->
-    <script src="js/standalone.js"></script>
+    <!-- Import scripts as ES modules -->
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

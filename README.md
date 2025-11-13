@@ -1,5 +1,7 @@
 # MDP Simulator
 
+**🎯 100% Standalone - No Server Required!** Just double-click `index.html` and start building MDPs!
+
 A browser-based Markov Decision Process (MDP) simulator built with vanilla HTML, CSS, and JavaScript. Draw MDP graphs, solve for optimal policies using Value Iteration, and simulate policy execution.
 
 ## Features
@@ -15,33 +17,9 @@ A browser-based Markov Decision Process (MDP) simulator built with vanilla HTML,
 
 ### Quick Start
 
-**Note**: This app uses ES6 modules which have CORS restrictions in browsers.  
-**Important**: The server is ONLY for serving static files - all MDP logic runs 100% in your browser! See [WHY_SERVER.md](WHY_SERVER.md) for details.
+Simply **double-click** `index.html` or open it in your browser. That's it!
 
-#### Recommended: Use a Simple Web Server
-
-The easiest way is to use Python's built-in server:
-
-```bash
-# In the project directory, run:
-python3 server.py
-
-# Then open your browser to:
-# http://localhost:8000
-```
-
-**Why a server?** Browsers block ES6 modules (`import`/`export`) from `file://` URLs for security. The Python script is just a **static file server** - it does NO computation. All MDP solving, simulation, and storage happens entirely in JavaScript in your browser.
-
-#### Alternative: Disable Browser Security (Not Recommended)
-
-You can run Chrome with `--allow-file-access-from-files` but this is a security risk.
-
-#### Alternative Browsers
-
-Firefox sometimes allows file:// module loading if you:
-1. Type `about:config` in address bar
-2. Set `security.fileuri.strict_origin_policy` to `false`
-3. Open `index.html`
+No installation, no server, no build tools needed. The entire application runs client-side in your browser using vanilla JavaScript.
 
 ### Loading the Demo
 

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MDP Simulator - Quick Test</title>
+</head>
+<body>
+    <h1>MDP Simulator Test</h1>
+    <div id="status">Testing...</div>
+    
+    <script src="js/standalone.js"></script>
+    <script>
+        // Wait for initialization
+        setTimeout(() => {
+            const status = document.getElementById('status');
+            try {
+                // Test that namespaces exist
+                if (!window.mdpDebug) throw new Error('mdpDebug not found');
+                if (!window.mdpDebug.model) throw new Error('model namespace missing');
+                if (!window.mdpDebug.ui) throw new Error('ui namespace missing');
+                if (!window.mdpDebug.mdp) throw new Error('mdp namespace missing');
+                if (!window.mdpDebug.simulate) throw new Error('simulate namespace missing');
+                if (!window.mdpDebug.storage) throw new Error('storage namespace missing');
+                
+                // Test basic functionality
+                const graph = window.mdpDebug.model.getGraph();
+                if (!graph) throw new Error('Graph not initialized');
+                if (!Array.isArray(graph.states)) throw new Error('States not an array');
+                if (!Array.isArray(graph.transitions)) throw new Error('Transitions not an array');
+                
+                // Test function existence
+                if (typeof window.loadDemoGraph !== 'function') throw new Error('loadDemoGraph not found');
+                
+                status.innerHTML = '<span style="color: green; font-weight: bold;">✅ ALL TESTS PASSED!</span><br>' +
+                                  'Namespaces: model, ui, mdp, simulate, storage ✓<br>' +
+                                  'Graph initialized ✓<br>' +
+                                  'Demo function available ✓<br><br>' +
+                                  '<button onclick="window.loadDemoGraph()">Load Demo Graph</button>';
+                console.log('✅ MDP Simulator standalone bundle is working correctly!');
+            } catch (error) {
+                status.innerHTML = '<span style="color: red; font-weight: bold;">❌ TEST FAILED</span><br>' + error.message;
+                console.error('❌ Test failed:', error);
+            }
+        }, 500);
+    </script>
+</body>
+</html>

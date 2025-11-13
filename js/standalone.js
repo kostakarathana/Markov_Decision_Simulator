@@ -1,3 +1,8 @@
+// MDP Simulator - Standalone Version
+// Works directly from file:// URLs - No server needed!
+(function() {
+'use strict';
+
 // utils.js - Utility functions
 
 let idCounter = 0;
@@ -5,24 +10,28 @@ let idCounter = 0;
 /**
  * Generate a unique ID with optional prefix
  */
+function uid(prefix = 'id') {
     return `${prefix}_${++idCounter}_${Date.now()}`;
 }
 
 /**
  * Clamp a value between min and max
  */
+function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
 
 /**
  * Sum an array of numbers
  */
+function sum(arr) {
     return arr.reduce((acc, val) => acc + val, 0);
 }
 
 /**
  * Round a number to specified decimal places
  */
+function round(num, decimals = 2) {
     const factor = Math.pow(10, decimals);
     return Math.round(num * factor) / factor;
 }
@@ -30,6 +39,7 @@ let idCounter = 0;
 /**
  * Assert a condition, throw error if false
  */
+function assert(condition, message) {
     if (!condition) {
         throw new Error(message || 'Assertion failed');
     }
@@ -38,18 +48,21 @@ let idCounter = 0;
 /**
  * Calculate distance between two points
  */
+function distance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 
 /**
  * Check if point is inside circle
  */
+function pointInCircle(px, py, cx, cy, radius) {
     return distance(px, py, cx, cy) <= radius;
 }
 
 /**
  * Get SVG point from mouse event
  */
+function getSVGPoint(svg, event) {
     const pt = svg.createSVGPoint();
     pt.x = event.clientX;
     pt.y = event.clientY;
@@ -59,12 +72,14 @@ let idCounter = 0;
 /**
  * Deep clone an object
  */
+function deepClone(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 
 /**
  * Debounce a function
  */
+function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
         const later = () => {
@@ -79,6 +94,7 @@ let idCounter = 0;
 /**
  * Generate a random color (for debugging)
  */
+function randomColor() {
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
 }
 
@@ -86,6 +102,7 @@ let idCounter = 0;
  * Calculate control points for a quadratic bezier curve
  * Used for curved edges between states
  */
+function getQuadraticControlPoint(x1, y1, x2, y2, curvature = 0.3) {
     const midX = (x1 + x2) / 2;
     const midY = (y1 + y2) / 2;
     
@@ -111,6 +128,7 @@ let idCounter = 0;
 /**
  * Format a number for display
  */
+function formatNumber(num, decimals = 2) {
     if (num === null || num === undefined) return '--';
     if (typeof num !== 'number') return String(num);
     return num.toFixed(decimals);
@@ -119,6 +137,7 @@ let idCounter = 0;
 /**
  * Check if arrays are equal
  */
+function arraysEqual(a, b) {
     if (a === b) return true;
     if (a == null || b == null) return false;
     if (a.length !== b.length) return false;
@@ -133,6 +152,7 @@ let idCounter = 0;
  * Weighted random choice
  * choices: array of {value, weight} or {value, prob}
  */
+function weightedChoice(choices, rng = Math.random) {
     const total = sum(choices.map(c => c.weight || c.prob || 1));
     let random = rng() * total;
     
@@ -150,6 +170,7 @@ let idCounter = 0;
 /**
  * Shuffle array (Fisher-Yates)
  */
+function shuffle(array) {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -161,6 +182,7 @@ let idCounter = 0;
 /**
  * Find index of max value in array
  */
+function argmax(arr) {
     if (arr.length === 0) return -1;
     let maxIdx = 0;
     let maxVal = arr[0];
@@ -176,6 +198,7 @@ let idCounter = 0;
 /**
  * Find all indices with max value (for tie-breaking)
  */
+function argmaxAll(arr) {
     if (arr.length === 0) return [];
     const maxVal = Math.max(...arr);
     return arr.map((val, idx) => val === maxVal ? idx : -1)
@@ -197,6 +220,7 @@ const state = {
 /**
  * Initialize or reset the model
  */
+function initModel() {
     state.version = 1;
     state.gamma = 0.95;
     state.epsilon = 0.001;
@@ -208,6 +232,7 @@ const state = {
 /**
  * Get the entire graph state
  */
+function getGraph() {
     return {
         version: state.version,
         gamma: state.gamma,
@@ -221,6 +246,7 @@ const state = {
 /**
  * Load a graph from JSON
  */
+function loadGraph(data) {
     state.version = data.version || 1;
     state.gamma = data.gamma || 0.95;
     state.epsilon = data.epsilon || 0.001;
@@ -232,6 +258,7 @@ const state = {
 /**
  * Update settings
  */
+function updateSettings(settings) {
     if (settings.gamma !== undefined) state.gamma = settings.gamma;
     if (settings.epsilon !== undefined) state.epsilon = settings.epsilon;
     if (settings.startStateId !== undefined) state.startStateId = settings.startStateId;
@@ -240,6 +267,7 @@ const state = {
 /**
  * Get settings
  */
+function getSettings() {
     return {
         gamma: state.gamma,
         epsilon: state.epsilon,
@@ -252,6 +280,7 @@ const state = {
 /**
  * Add a new state
  */
+function addState(x, y, label = 'State') {
     const newState = {
         id: uid('state'),
         label: label,
@@ -267,6 +296,7 @@ const state = {
 /**
  * Remove a state and all associated actions
  */
+function removeState(stateId) {
     // Remove the state
     const idx = state.states.findIndex(s => s.id === stateId);
     if (idx === -1) return false;
@@ -295,6 +325,7 @@ const state = {
 /**
  * Update a state's properties
  */
+function updateState(stateId, props) {
     const stateObj = state.states.find(s => s.id === stateId);
     if (!stateObj) return false;
     
@@ -310,12 +341,14 @@ const state = {
 /**
  * Get a state by ID
  */
+function getStateById(stateId) {
     return state.states.find(s => s.id === stateId);
 }
 
 /**
  * Get all states
  */
+function getAllStates() {
     return [...state.states];
 }
 
@@ -324,6 +357,7 @@ const state = {
 /**
  * Add a new action
  */
+function addAction(stateId, label = 'Action', cost = 0) {
     const stateObj = getStateById(stateId);
     if (!stateObj) return null;
     
@@ -341,6 +375,7 @@ const state = {
 /**
  * Remove an action
  */
+function removeAction(actionId) {
     const idx = state.actions.findIndex(a => a.id === actionId);
     if (idx === -1) return false;
     
@@ -351,6 +386,7 @@ const state = {
 /**
  * Update an action's properties
  */
+function updateAction(actionId, props) {
     const action = state.actions.find(a => a.id === actionId);
     if (!action) return false;
     
@@ -363,18 +399,21 @@ const state = {
 /**
  * Get an action by ID
  */
+function getActionById(actionId) {
     return state.actions.find(a => a.id === actionId);
 }
 
 /**
  * Get all actions from a state
  */
+function getActionsFromState(stateId) {
     return state.actions.filter(a => a.stateId === stateId);
 }
 
 /**
  * Get all actions
  */
+function getAllActions() {
     return [...state.actions];
 }
 
@@ -383,6 +422,7 @@ const state = {
 /**
  * Add an outcome to an action
  */
+function addOutcome(actionId, toStateId, prob = 1.0) {
     const action = getActionById(actionId);
     if (!action) return false;
     
@@ -400,6 +440,7 @@ const state = {
 /**
  * Remove an outcome from an action
  */
+function removeOutcome(actionId, toStateId) {
     const action = getActionById(actionId);
     if (!action) return false;
     
@@ -413,6 +454,7 @@ const state = {
 /**
  * Update an outcome's probability
  */
+function updateOutcome(actionId, toStateId, prob) {
     const action = getActionById(actionId);
     if (!action) return false;
     
@@ -428,6 +470,7 @@ const state = {
 /**
  * Validate the entire graph
  */
+function validateGraph() {
     const errors = [];
     const warnings = [];
     
@@ -476,6 +519,7 @@ const state = {
 /**
  * Validate a specific action's outcomes
  */
+function validateActionOutcomes(actionId) {
     const action = getActionById(actionId);
     if (!action) return { valid: false, sum: 0 };
     
@@ -488,6 +532,7 @@ const state = {
 /**
  * Auto-normalize action outcomes
  */
+function normalizeActionOutcomes(actionId) {
     const action = getActionById(actionId);
     if (!action || action.outcomes.length === 0) return false;
     
@@ -509,6 +554,7 @@ const state = {
 /**
  * Get reachable states from a starting state
  */
+function getReachableStates(startStateId) {
     if (!startStateId) return new Set();
     
     const reachable = new Set([startStateId]);
@@ -534,6 +580,7 @@ const state = {
 /**
  * Check if graph has cycles
  */
+function hasCycles() {
     const visited = new Set();
     const recStack = new Set();
     
@@ -572,6 +619,7 @@ const state = {
  * @param {Object} options - { gamma, epsilon, maxIterations }
  * @returns {Object} - { values, policy, iterations, converged }
  */
+function valueIteration(options = {}) {
     const graph = model.getGraph();
     const gamma = options.gamma !== undefined ? options.gamma : graph.gamma;
     const epsilon = options.epsilon !== undefined ? options.epsilon : graph.epsilon;
@@ -687,6 +735,7 @@ function calculateQ(state, action, V, gamma) {
  * @param {Object} options - { gamma, epsilon, maxIterations }
  * @returns {Object} - { values, policy, iterations, converged }
  */
+function policyIteration(options = {}) {
     const graph = model.getGraph();
     const gamma = options.gamma !== undefined ? options.gamma : graph.gamma;
     const epsilon = options.epsilon !== undefined ? options.epsilon : graph.epsilon;
@@ -830,6 +879,7 @@ function policyEvaluation(policy, gamma, epsilon, maxIterations) {
 /**
  * Get Q-values for all actions in a state
  */
+function getQValues(stateId, values, gamma) {
     const state = model.getStateById(stateId);
     if (!state) return {};
     
@@ -846,6 +896,7 @@ function policyEvaluation(policy, gamma, epsilon, maxIterations) {
 /**
  * Get the optimal action for a state given values
  */
+function getOptimalAction(stateId, values, gamma) {
     const qValues = getQValues(stateId, values, gamma);
     const actionIds = Object.keys(qValues);
     
@@ -867,6 +918,7 @@ function policyEvaluation(policy, gamma, epsilon, maxIterations) {
 /**
  * Compute expected value of a policy from a start state
  */
+function evaluatePolicy(policy, startStateId, gamma, horizon = 100) {
     const state = model.getStateById(startStateId);
     if (!state) return 0;
     
@@ -922,6 +974,7 @@ function policyEvaluation(policy, gamma, epsilon, maxIterations) {
  * @param {Function} rng - Random number generator (default: Math.random)
  * @returns {Object} - { trajectory, totalReward, steps }
  */
+function rollout(policy, startStateId, maxSteps = 20, rng = Math.random) {
     const trajectory = [];
     let totalReward = 0;
     let currentStateId = startStateId;
@@ -1073,6 +1126,7 @@ function sampleOutcome(outcomes, rng = Math.random) {
  * @param {number} maxSteps - Maximum steps per run
  * @returns {Object} - Statistics about the runs
  */
+function multipleRollouts(policy, startStateId, numRuns = 100, maxSteps = 20) {
     const results = [];
     
     for (let i = 0; i < numRuns; i++) {
@@ -1116,6 +1170,7 @@ function sampleOutcome(outcomes, rng = Math.random) {
  * @param {Function} rng - Random number generator
  * @returns {Object} - Trajectory and total reward
  */
+function randomWalk(startStateId, maxSteps = 20, rng = Math.random) {
     const trajectory = [];
     let totalReward = 0;
     let currentStateId = startStateId;
@@ -1192,6 +1247,7 @@ function sampleOutcome(outcomes, rng = Math.random) {
  * @param {number} maxSteps - Maximum steps per run
  * @returns {Object} - State visitation counts and frequencies
  */
+function stateVisitationFrequency(policy, startStateId, numRuns = 1000, maxSteps = 20) {
     const counts = {};
     const states = model.getAllStates();
     
@@ -1231,6 +1287,7 @@ function sampleOutcome(outcomes, rng = Math.random) {
 /**
  * Generate a trajectory as a string for display
  */
+function trajectoryToString(trajectory) {
     return trajectory.map((step, idx) => {
         let str = `${idx}. ${step.state}`;
         if (step.action) {
@@ -1251,10 +1308,11 @@ function sampleOutcome(outcomes, rng = Math.random) {
  * @param {number} maxSteps - Maximum steps per run
  * @returns {number} - Average total reward
  */
+function evaluatePolicyMonteCarlo(policy, startStateId, numRuns = 1000, maxSteps = 20) {
     const results = multipleRollouts(policy, startStateId, numRuns, maxSteps);
     return results.avgReward;
 }
-// storage.js - Storage, import/functionality
+// storage.js - Storage, import/export functionality
 
 
 const STORAGE_KEY = 'mdp-simulator-graph';
@@ -1263,6 +1321,7 @@ const AUTOSAVE_DELAY = 1000; // ms
 /**
  * Save graph to localStorage
  */
+function save() {
     try {
         const graph = model.getGraph();
         const json = JSON.stringify(graph);
@@ -1277,10 +1336,12 @@ const AUTOSAVE_DELAY = 1000; // ms
 /**
  * Debounced autosave
  */
+const autosave = debounce(save, AUTOSAVE_DELAY);
 
 /**
  * Load graph from localStorage
  */
+function load() {
     try {
         const json = localStorage.getItem(STORAGE_KEY);
         if (!json) return null;
@@ -1296,6 +1357,7 @@ const AUTOSAVE_DELAY = 1000; // ms
 /**
  * Clear localStorage
  */
+function clear() {
     try {
         localStorage.removeItem(STORAGE_KEY);
         return true;
@@ -1308,6 +1370,7 @@ const AUTOSAVE_DELAY = 1000; // ms
 /**
  * Export graph as JSON file
  */
+function exportJSON() {
     const graph = model.getGraph();
     const json = JSON.stringify(graph, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
@@ -1327,6 +1390,7 @@ const AUTOSAVE_DELAY = 1000; // ms
  * @param {File} file - File object
  * @returns {Promise<Object>} - Parsed graph object
  */
+function importJSON(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         
@@ -1361,6 +1425,7 @@ const AUTOSAVE_DELAY = 1000; // ms
 /**
  * Export graph as CSV (state-value table)
  */
+function exportCSV(solution) {
     if (!solution) {
         console.warn('No solution to export');
         return;
@@ -1405,6 +1470,7 @@ const AUTOSAVE_DELAY = 1000; // ms
 /**
  * Export simulation results as CSV
  */
+function exportSimulationCSV(simulationResult) {
     if (!simulationResult || !simulationResult.trajectory) {
         console.warn('No simulation result to export');
         return;
@@ -1437,6 +1503,7 @@ const AUTOSAVE_DELAY = 1000; // ms
 /**
  * Check if localStorage is available
  */
+function isLocalStorageAvailable() {
     try {
         const test = '__test__';
         localStorage.setItem(test, test);
@@ -1450,6 +1517,7 @@ const AUTOSAVE_DELAY = 1000; // ms
 /**
  * Get storage size (approximate)
  */
+function getStorageSize() {
     let total = 0;
     for (let key in localStorage) {
         if (localStorage.hasOwnProperty(key)) {
@@ -1465,7 +1533,6 @@ const AUTOSAVE_DELAY = 1000; // ms
     getQuadraticControlPoint, 
     formatNumber, 
     round 
-} from './utils.js';
 
 // UI State
 const uiState = {
@@ -1485,6 +1552,7 @@ const STATE_RADIUS = 30;
 /**
  * Initialize the UI
  */
+function initUI() {
     svg = document.getElementById('canvas');
     statesLayer = document.getElementById('states-layer');
     edgesLayer = document.getElementById('edges-layer');
@@ -1505,6 +1573,7 @@ const STATE_RADIUS = 30;
 /**
  * Full render of the graph
  */
+function render() {
     renderEdges();
     renderStates();
     updateInspector();
@@ -1841,13 +1910,16 @@ function selectAction(actionId) {
     uiState.selectedStateId = null;
 }
 
+function clearSelection() {
     uiState.selectedStateId = null;
     uiState.selectedActionId = null;
 }
 
+function getSelectedStateId() {
     return uiState.selectedStateId;
 }
 
+function getSelectedActionId() {
     return uiState.selectedActionId;
 }
 
@@ -2072,6 +2144,7 @@ function updateStartStateDropdown() {
 
 // === TOOL ACTIONS ===
 
+function addStateAtCenter() {
     const rect = svg.getBoundingClientRect();
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
@@ -2081,6 +2154,7 @@ function updateStartStateDropdown() {
     render();
 }
 
+function enterConnectMode() {
     if (uiState.selectedStateId) {
         uiState.connectMode = true;
         uiState.connectFromStateId = uiState.selectedStateId;
@@ -2090,6 +2164,7 @@ function updateStartStateDropdown() {
     }
 }
 
+function deleteSelected() {
     if (uiState.selectedStateId) {
         model.removeState(uiState.selectedStateId);
         clearSelection();
@@ -2103,6 +2178,7 @@ function updateStartStateDropdown() {
 
 // === SOLUTION DISPLAY ===
 
+function setSolution(solution) {
     uiState.solution = solution;
     render();
     
@@ -2152,6 +2228,7 @@ function updateStartStateDropdown() {
     valueTable.appendChild(table);
 }
 
+function clearSolution() {
     uiState.solution = null;
     document.getElementById('solution-inspector').style.display = 'none';
     render();
@@ -2159,6 +2236,7 @@ function updateStartStateDropdown() {
 
 // === SIMULATION DISPLAY ===
 
+function showSimulation(result) {
     uiState.simulationResult = result;
     
     // Clear previous simulation
@@ -2224,6 +2302,7 @@ function drawSimulationPath(trajectory) {
     });
 }
 
+function clearSimulation() {
     uiState.simulationResult = null;
     simulationLayer.innerHTML = '';
     document.getElementById('simulation-inspector').style.display = 'none';
@@ -2231,6 +2310,7 @@ function drawSimulationPath(trajectory) {
 
 // === STATUS ===
 
+function setStatus(message) {
     document.getElementById('status-message').textContent = message;
 }
 // app.js - Main application controller
@@ -2238,6 +2318,49 @@ function drawSimulationPath(trajectory) {
 
 // Application state
 let currentSolution = null;
+
+// Undo/Redo history
+const commandHistory = {
+    past: [],
+    future: [],
+    maxHistory: 50,
+    
+    saveState() {
+        const currentState = model.getGraph();
+        if (currentState) {
+            this.past.push(deepClone(currentState));
+            if (this.past.length > this.maxHistory) {
+                this.past.shift();
+            }
+            this.future = []; // Clear redo stack when new action is taken
+        }
+    },
+    
+    undo() {
+        if (this.past.length === 0) return false;
+        const currentState = model.getGraph();
+        this.future.push(deepClone(currentState));
+        const previousState = this.past.pop();
+        model.loadGraph(previousState);
+        ui.render();
+        return true;
+    },
+    
+    redo() {
+        if (this.future.length === 0) return false;
+        const currentState = model.getGraph();
+        this.past.push(deepClone(currentState));
+        const nextState = this.future.pop();
+        model.loadGraph(nextState);
+        ui.render();
+        return true;
+    },
+    
+    clear() {
+        this.past = [];
+        this.future = [];
+    }
+};
 
 /**
  * Initialize the application
@@ -2276,6 +2399,12 @@ function init() {
  * Setup event listeners for all buttons and controls
  */
 function setupEventListeners() {
+    // Example buttons
+    document.getElementById('btn-example-recycling').addEventListener('click', loadRecyclingExample);
+    document.getElementById('btn-example-gridworld').addEventListener('click', loadGridWorldExample);
+    document.getElementById('btn-example-health').addEventListener('click', loadHealthExample);
+    document.getElementById('btn-new-graph').addEventListener('click', createNewGraph);
+    
     // Tool buttons
     document.getElementById('btn-add-state').addEventListener('click', handleAddState);
     document.getElementById('btn-add-action').addEventListener('click', handleAddAction);
@@ -2284,12 +2413,14 @@ function setupEventListeners() {
     document.getElementById('btn-simulate').addEventListener('click', handleSimulate);
     document.getElementById('btn-export').addEventListener('click', handleExport);
     document.getElementById('btn-import').addEventListener('click', handleImport);
-    document.getElementById('btn-reset').addEventListener('click', handleReset);
     
     // Settings
     document.getElementById('gamma').addEventListener('input', handleSettingsChange);
     document.getElementById('epsilon').addEventListener('input', handleSettingsChange);
     document.getElementById('start-state').addEventListener('change', handleStartStateChange);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', handleKeyboardShortcuts);
     
     // Setup autosave
     setupAutosave();
@@ -2308,18 +2439,66 @@ function setupAutosave() {
 
 // === EVENT HANDLERS ===
 
+function handleKeyboardShortcuts(event) {
+    // Check if user is typing in an input field
+    const isTyping = event.target.tagName === 'INPUT' || 
+                     event.target.tagName === 'TEXTAREA' || 
+                     event.target.isContentEditable;
+    
+    // Undo: Cmd+Z (Mac) or Ctrl+Z (Windows/Linux)
+    if ((event.metaKey || event.ctrlKey) && event.key === 'z' && !event.shiftKey) {
+        event.preventDefault();
+        if (commandHistory.undo()) {
+            ui.setStatus('Undo');
+        }
+        return;
+    }
+    
+    // Redo: Cmd+Shift+Z (Mac) or Ctrl+Shift+Z (Windows/Linux)
+    if ((event.metaKey || event.ctrlKey) && event.key === 'z' && event.shiftKey) {
+        event.preventDefault();
+        if (commandHistory.redo()) {
+            ui.setStatus('Redo');
+        }
+        return;
+    }
+    
+    // Redo alternative: Cmd+Y or Ctrl+Y
+    if ((event.metaKey || event.ctrlKey) && event.key === 'y') {
+        event.preventDefault();
+        if (commandHistory.redo()) {
+            ui.setStatus('Redo');
+        }
+        return;
+    }
+    
+    // Prevent Delete key from deleting nodes when typing
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+        if (isTyping) {
+            // Allow normal delete behavior in input fields
+            return;
+        }
+        // Only delete selected node if not typing
+        event.preventDefault();
+        handleDelete();
+    }
+}
+
 function handleAddState() {
+    commandHistory.saveState();
     ui.addStateAtCenter();
     ui.setStatus('Added new state');
     storage.autosave();
 }
 
 function handleAddAction() {
+    commandHistory.saveState();
     ui.enterConnectMode();
     storage.autosave();
 }
 
 function handleDelete() {
+    commandHistory.saveState();
     ui.deleteSelected();
     ui.setStatus('Deleted selection');
     storage.autosave();
@@ -2508,6 +2687,151 @@ function handleStartStateChange() {
 /**
  * Load a demo graph for testing
  */
+// === EXAMPLE GRAPHS ===
+
+/**
+ * Load Recycling Robot example
+ */
+function loadRecyclingExample() {
+    model.init();
+    
+    const high = model.addState(200, 200, 'High Battery');
+    const low = model.addState(400, 200, 'Low Battery');
+    
+    model.updateState(high.id, { reward: 0, terminal: false });
+    model.updateState(low.id, { reward: 0, terminal: false });
+    
+    // High Battery: Search action
+    const searchHigh = model.addAction(high.id, 'Search', 0);
+    model.addOutcome(searchHigh.id, high.id, 0.7);
+    model.addOutcome(searchHigh.id, low.id, 0.3);
+    model.updateAction(searchHigh.id, { reward: 3 });
+    
+    // High Battery: Wait action
+    const waitHigh = model.addAction(high.id, 'Wait', 0);
+    model.addOutcome(waitHigh.id, high.id, 1.0);
+    model.updateAction(waitHigh.id, { reward: 1 });
+    
+    // Low Battery: Search action
+    const searchLow = model.addAction(low.id, 'Search', 0);
+    model.addOutcome(searchLow.id, low.id, 0.5);
+    model.addOutcome(searchLow.id, high.id, 0.5);
+    model.updateAction(searchLow.id, { reward: -3 });
+    
+    // Low Battery: Recharge action
+    const recharge = model.addAction(low.id, 'Recharge', 0);
+    model.addOutcome(recharge.id, high.id, 1.0);
+    model.updateAction(recharge.id, { reward: 0 });
+    
+    model.updateSettings({ startStateId: high.id, gamma: 0.9 });
+    ui.render();
+    storage.save();
+    ui.setStatus('Loaded Recycling Robot example');
+}
+
+/**
+ * Load Grid World example
+ */
+function loadGridWorldExample() {
+    model.init();
+    
+    const s0 = model.addState(150, 150, 'S0');
+    const s1 = model.addState(350, 150, 'S1');
+    const s2 = model.addState(150, 350, 'S2');
+    const goal = model.addState(350, 350, 'Goal');
+    
+    model.updateState(s0.id, { reward: 0, terminal: false });
+    model.updateState(s1.id, { reward: 0, terminal: false });
+    model.updateState(s2.id, { reward: 0, terminal: false });
+    model.updateState(goal.id, { reward: 10, terminal: true });
+    
+    // S0 actions
+    const right0 = model.addAction(s0.id, 'right', 0);
+    model.addOutcome(right0.id, s1.id, 0.8);
+    model.addOutcome(right0.id, s0.id, 0.2);
+    
+    const down0 = model.addAction(s0.id, 'down', 0);
+    model.addOutcome(down0.id, s2.id, 0.8);
+    model.addOutcome(down0.id, s0.id, 0.2);
+    
+    // S1 actions
+    const down1 = model.addAction(s1.id, 'down', 0);
+    model.addOutcome(down1.id, goal.id, 0.8);
+    model.addOutcome(down1.id, s1.id, 0.2);
+    
+    const left1 = model.addAction(s1.id, 'left', 0);
+    model.addOutcome(left1.id, s0.id, 0.8);
+    model.addOutcome(left1.id, s1.id, 0.2);
+    
+    // S2 actions
+    const right2 = model.addAction(s2.id, 'right', 0);
+    model.addOutcome(right2.id, goal.id, 0.8);
+    model.addOutcome(right2.id, s2.id, 0.2);
+    
+    const up2 = model.addAction(s2.id, 'up', 0);
+    model.addOutcome(up2.id, s0.id, 0.8);
+    model.addOutcome(up2.id, s2.id, 0.2);
+    
+    model.updateSettings({ startStateId: s0.id, gamma: 0.9 });
+    ui.render();
+    storage.save();
+    ui.setStatus('Loaded Grid World example');
+}
+
+/**
+ * Load Health Management example
+ */
+function loadHealthExample() {
+    model.init();
+    
+    const healthy = model.addState(150, 200, 'Healthy');
+    const sick = model.addState(300, 200, 'Sick');
+    const dead = model.addState(450, 200, 'Dead');
+    
+    model.updateState(healthy.id, { reward: 10, terminal: false });
+    model.updateState(sick.id, { reward: -5, terminal: false });
+    model.updateState(dead.id, { reward: -50, terminal: true });
+    
+    // Healthy: Exercise
+    const exercise = model.addAction(healthy.id, 'Exercise', 1);
+    model.addOutcome(exercise.id, healthy.id, 0.95);
+    model.addOutcome(exercise.id, sick.id, 0.05);
+    
+    // Healthy: Relax
+    const relax = model.addAction(healthy.id, 'Relax', 0);
+    model.addOutcome(relax.id, healthy.id, 0.8);
+    model.addOutcome(relax.id, sick.id, 0.2);
+    
+    // Sick: Doctor
+    const doctor = model.addAction(sick.id, 'Doctor', 5);
+    model.addOutcome(doctor.id, healthy.id, 0.7);
+    model.addOutcome(doctor.id, sick.id, 0.25);
+    model.addOutcome(doctor.id, dead.id, 0.05);
+    
+    // Sick: Rest
+    const rest = model.addAction(sick.id, 'Rest', 0);
+    model.addOutcome(rest.id, healthy.id, 0.3);
+    model.addOutcome(rest.id, sick.id, 0.5);
+    model.addOutcome(rest.id, dead.id, 0.2);
+    
+    model.updateSettings({ startStateId: healthy.id, gamma: 0.95 });
+    ui.render();
+    storage.save();
+    ui.setStatus('Loaded Health Management example');
+}
+
+/**
+ * Create a new blank graph
+ */
+function createNewGraph() {
+    if (confirm('Create a new blank graph? Current graph will be cleared.')) {
+        model.init();
+        ui.render();
+        storage.save();
+        ui.setStatus('Created new graph');
+    }
+}
+
 function loadDemoGraph() {
     model.init();
     
@@ -2559,3 +2883,61 @@ if (document.readyState === 'loading') {
 }
 
 // Export for potential module use
+
+
+// ============================================================================
+// CREATE NAMESPACE OBJECTS (Restore module structure)
+// ============================================================================
+
+const model = {
+    graph: null,
+    getGraph, loadGraph, init: initModel, validateGraph,
+    getStateById, getAllStates, addState, updateState, deleteState: removeState,
+    getActionsFromState,
+    getSettings, updateSettings,
+    addAction, getAllActions, getActionById, removeAction, updateAction,
+    addOutcome, removeOutcome, updateOutcome, validateActionOutcomes
+};
+
+const ui = {
+    svg: null, panOffset: { x: 0, y: 0 }, zoom: 1, isDragging: false,
+    dragState: null, selectedState: null, selectedAction: null,
+    init: initUI, render, renderStates, addStateAtCenter,
+    setStatus, setSolution, deleteSelected, enterConnectMode,
+    clearSelection, clearSimulation, clearSolution, showSimulation
+};
+
+const mdp = {
+    valueIteration, 
+    policyIteration, 
+    policyEvaluation
+};
+
+const simulate = {
+    evaluatePolicyMonteCarlo,
+    exportSimulationCSV
+};
+
+const storage = {
+    save, 
+    load, 
+    exportJSON, 
+    importJSON
+};
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+
+// Expose utilities globally for console debugging
+window.mdpDebug = { model, ui, mdp, simulate, storage, commandHistory };
+window.loadDemoGraph = loadDemoGraph;
+window.loadRecyclingExample = loadRecyclingExample;
+window.loadGridWorldExample = loadGridWorldExample;
+window.loadHealthExample = loadHealthExample;
+window.createNewGraph = createNewGraph;
+
+})(); // End IIFE

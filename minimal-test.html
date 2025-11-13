@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Minimal Test</title>
+</head>
+<body>
+    <h1>Minimal Test</h1>
+    <p id="test1">Test 1: Script tag...</p>
+    <p id="test2">Test 2: Checking...</p>
+    <p id="test3">Test 3: Checking...</p>
+    
+    <script>
+        console.log('BEFORE standalone.js');
+        document.getElementById('test1').textContent = 'Test 1: Before script loads';
+    </script>
+    
+    <script src="js/standalone.js"></script>
+    
+    <script>
+        console.log('AFTER standalone.js');
+        document.getElementById('test2').textContent = 'Test 2: Script tag executed';
+        
+        setTimeout(() => {
+            if (typeof window.mdpDebug !== 'undefined') {
+                document.getElementById('test3').textContent = 'Test 3: ✓ window.mdpDebug EXISTS';
+                console.log('mdpDebug:', window.mdpDebug);
+            } else {
+                document.getElementById('test3').textContent = 'Test 3: ✗ window.mdpDebug MISSING';
+                console.error('window.mdpDebug is undefined!');
+            }
+        }, 500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    <button id="test-btn">Test Button</button>
+    <div id="output"></div>
+    
+    <script src="js/standalone.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        
+        // Test 1: Check if script loaded
+        output.innerHTML += '<p>Script loaded ✓</p>';
+        
+        // Test 2: Check window.mdpDebug
+        if (window.mdpDebug) {
+            output.innerHTML += '<p>window.mdpDebug exists ✓</p>';
+            output.innerHTML += '<pre>' + JSON.stringify(Object.keys(window.mdpDebug), null, 2) + '</pre>';
+        } else {
+            output.innerHTML += '<p style="color: red;">window.mdpDebug MISSING ✗</p>';
+        }
+        
+        // Test 3: Check if init ran
+        setTimeout(() => {
+            if (window.mdpDebug && window.mdpDebug.model) {
+                const graph = window.mdpDebug.model.getGraph();
+                output.innerHTML += '<p>Model initialized: ' + (graph ? '✓' : '✗') + '</p>';
+                if (graph) {
+                    output.innerHTML += '<pre>Graph: ' + JSON.stringify(graph, null, 2) + '</pre>';
+                }
+            }
+        }, 1000);
+        
+        // Test 4: Button click test
+        document.getElementById('test-btn').addEventListener('click', () => {
+            output.innerHTML += '<p>Button click works ✓</p>';
+            console.log('Button clicked!');
+        });
+    </script>
+</body>
+</html>
